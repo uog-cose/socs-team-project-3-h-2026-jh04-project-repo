@@ -1,0 +1,50 @@
+.root {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 10px;
+  color: light-dark(var(--mantine-color-gray-9), var(--mantine-color-white));
+}
+
+.mark {
+  width: 34px;
+  height: 34px;
+  flex: none;
+  background: currentColor;
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
+}
+
+.divider {
+  width: 1px;
+  height: 34px;
+  background: currentColor;
+
+  @media (max-width: $mantine-breakpoint-xs) {
+    display: none;
+  }
+}
+
+.text {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-family: 'Poppins', var(--mantine-font-family);
+  line-height: 1;
+}
+
+.wordmark {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.subline {
+  margin-top: 2px;
+  padding-left: 0.32em;
+  margin-right: -0.32em;
+  font-size: 7.5px;
+  font-weight: 400;
+  letter-spacing: 0.32em;
+}
