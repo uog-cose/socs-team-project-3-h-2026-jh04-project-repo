@@ -1,0 +1,420 @@
+openapi: 3.1.0
+info:
+  title: pyMechT GUI API
+  version: 0.1.0-draft
+  description: |
+    DRAFT contract written by the frontend so work can start before the backend exists.
+    Measure names, geometry keys and parameter names follow pyMechT and must be confirmed
+    by the backend (BE #1). Once FastAPI serves /openapi.json, regenerate the frontend types
+    with `npm run generate:api:live` and delete this file.
+
+paths:
+  /health:
+    get:
+      operationId: getHealth
+      responses:
+        '200':
+          description: The server is up.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Health'
+
+  /catalog:
+    get:
+      operationId: getCatalog
+      summary: Material models, experiments and presets the GUI can offer.
+      responses:
+        '200':
+          description: The catalog.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Catalog'
+
+  /parameters:
+    post:
+      operationId: buildParameters
+      summary: Build the parameter table for a material and experiment.
+      description: |
+        Values in `previous` are kept wherever the parameter still exists. Rows are matched
+        on `componentId` + `base` rather than `key`, so edits survive reordering
+        (mu_0 becoming mu_1).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ParametersRequest'
+      responses:
+        '200':
+          description: The parameter table.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParametersResponse'
+        '422':
+          $ref: '#/components/responses/Error'
+
+  /simulate:
+    post:
+      operationId: simulate
+      summary: Run a simulation for the session config.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SimulateRequest'
+      responses:
+        '200':
+          description: Simulation results.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimulateResponse'
+        '422':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
+
+components:
+  responses:
+    Error:
+      description: A readable error message.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+  schemas:
+    Health:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          const: ok
+        pymechtVersion:
+          type: string
+
+    ErrorResponse:
+      type: object
+      required: [detail]
+      properties:
+        detail:
+          type: string
+          description: Message that is safe to show to the user.
+        log:
+          type: array
+          items:
+            type: string
+          description: pyMechT console output captured before the failure.
+
+    # ---------------------------------------------------------------- Catalog
+
+    Catalog:
+      type: object
+      required: [materials, experiments, presets]
+      properties:
+        materials:
+          type: array
+          items:
+            $ref: '#/components/schemas/CatalogMaterial'
+        experiments:
+          type: array
+          items:
+            $ref: '#/components/schemas/CatalogExperiment'
+        presets:
+          type: array
+          items:
+            $ref: '#/components/schemas/MaterialPreset'
+
+    CatalogMaterial:
+      type: object
+      required: [type, name, equation, params, fiberBased]
+      properties:
+        type:
+          type: string
+          description: pyMechT model name passed to MatModel, e.g. "goh".
+          examples: [goh]
+        name:
+          type: string
+          examples: [Gasser–Ogden–Holzapfel]
+        equation:
+          type: string
+          description: Strain-energy function as LaTeX.
+        params:
+          type: array
+          description: Parameter base names, before the _0/_1 component suffix.
+          items:
+            type: string
+          examples: [[k1, k2, k3]]
+        fiberBased:
+          type: boolean
+
+    CatalogExperiment:
+      type: object
+      required: [type, name, description, axes, inputMeasures, outputMeasures, fiberReferenceAxis]
+      properties:
+        type:
+          $ref: '#/components/schemas/ExperimentType'
+        name:
+          type: string
+        description:
+          type: string
+        axes:
+          type: integer
+          description: Number of loading axes (2 for planar biaxial).
+          minimum: 1
+          maximum: 2
+        inputMeasures:
+          type: array
+          items:
+            $ref: '#/components/schemas/Measure'
+        outputMeasures:
+          type: array
+          items:
+            $ref: '#/components/schemas/Measure'
+        fiberReferenceAxis:
+          type: string
+          enum: [x, circumferential]
+
+    Measure:
+      type: object
+      required: [id, label, quantity]
+      properties:
+        id:
+          type: string
+          description: pyMechT measure name, e.g. "stretch" or "cauchy".
+        label:
+          type: string
+          examples: [Cauchy stress]
+        quantity:
+          $ref: '#/components/schemas/Quantity'
+
+    Quantity:
+      type: string
+      description: What kind of unit the measure takes; used to build axis labels.
+      enum: [dimensionless, length, area, force, stress, tension]
+
+    MaterialPreset:
+      type: object
+      required: [id, name, components]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+          examples: [GOH + neo-Hookean]
+        components:
+          type: array
+          items:
+            type: string
+          examples: [[goh, nh]]
+
+    # --------------------------------------------------------- Session config
+
+    ExperimentType:
+      type: string
+      enum: [uniaxial, biaxial, tube]
+
+    SessionConfig:
+      type: object
+      required: [material, experiment, parameters, protocol, units]
+      properties:
+        material:
+          $ref: '#/components/schemas/MaterialConfig'
+        experiment:
+          $ref: '#/components/schemas/ExperimentConfig'
+        parameters:
+          type: array
+          items:
+            $ref: '#/components/schemas/ParameterRow'
+        protocol:
+          $ref: '#/components/schemas/Protocol'
+        units:
+          $ref: '#/components/schemas/UnitLabels'
+
+    MaterialConfig:
+      type: object
+      required: [components]
+      properties:
+        components:
+          type: array
+          items:
+            $ref: '#/components/schemas/MaterialComponent'
+
+    MaterialComponent:
+      type: object
+      required: [id, type]
+      properties:
+        id:
+          type: string
+          description: Stable client-side id; does not change when components are reordered.
+        type:
+          type: string
+          description: A CatalogMaterial type.
+        fiber:
+          oneOf:
+            - $ref: '#/components/schemas/FiberConfig'
+            - type: 'null'
+
+    FiberConfig:
+      type: object
+      required: [mode, angleDeg]
+      properties:
+        mode:
+          type: string
+          enum: [single, symmetric]
+        angleDeg:
+          type: number
+          description: Angle from the experiment's fiberReferenceAxis, in degrees.
+
+    ExperimentConfig:
+      type: object
+      required: [type, inputMeasure, outputMeasure]
+      properties:
+        type:
+          $ref: '#/components/schemas/ExperimentType'
+        inputMeasure:
+          type: string
+        outputMeasure:
+          type: string
+
+    ParameterRow:
+      type: object
+      required: [key, base, group, label, value, fixed, lower, upper]
+      properties:
+        key:
+          type: string
+          description: pyMechT ParamDict key, e.g. "mu_0" or "L0".
+        base:
+          type: string
+          description: Key without the component suffix, e.g. "mu".
+        componentId:
+          description: The MaterialComponent this row belongs to; null for geometry.
+          oneOf:
+            - type: string
+            - type: 'null'
+        group:
+          type: string
+          enum: [geometry, material]
+        label:
+          type: string
+          examples: [Shear modulus]
+        value:
+          type: number
+        fixed:
+          type: boolean
+        lower:
+          type: number
+        upper:
+          type: number
+
+    Protocol:
+      type: object
+      required: [control, axes]
+      properties:
+        control:
+          type: string
+          enum: [displacement, force]
+        axes:
+          type: array
+          description: One range per loading axis (two for biaxial).
+          minItems: 1
+          maxItems: 2
+          items:
+            $ref: '#/components/schemas/ProtocolAxis'
+        initialGuess:
+          description: Initial guess for force-controlled runs, one per axis.
+          oneOf:
+            - type: array
+              items:
+                type: number
+            - type: 'null'
+
+    ProtocolAxis:
+      type: object
+      required: [start, end, points]
+      properties:
+        start:
+          type: number
+        end:
+          type: number
+        points:
+          type: integer
+          minimum: 2
+
+    UnitLabels:
+      type: object
+      description: Display labels only; pyMechT is unit-free.
+      required: [length, force, stress]
+      properties:
+        length:
+          type: string
+          examples: [mm]
+        force:
+          type: string
+          examples: [N]
+        stress:
+          type: string
+          examples: [kPa]
+
+    # ------------------------------------------------------ Request/response
+
+    ParametersRequest:
+      type: object
+      required: [material, experiment]
+      properties:
+        material:
+          $ref: '#/components/schemas/MaterialConfig'
+        experiment:
+          $ref: '#/components/schemas/ExperimentConfig'
+        previous:
+          type: array
+          items:
+            $ref: '#/components/schemas/ParameterRow'
+
+    ParametersResponse:
+      type: object
+      required: [parameters]
+      properties:
+        parameters:
+          type: array
+          items:
+            $ref: '#/components/schemas/ParameterRow'
+
+    SimulateRequest:
+      type: object
+      required: [config]
+      properties:
+        config:
+          $ref: '#/components/schemas/SessionConfig'
+
+    SimulateResponse:
+      type: object
+      required: [input, output, log, warnings]
+      properties:
+        input:
+          description: N×axes array of input values.
+          type: array
+          items:
+            type: array
+            items:
+              type: number
+        output:
+          description: N×axes array of output values.
+          type: array
+          items:
+            type: array
+            items:
+              type: number
+        log:
+          type: array
+          items:
+            type: string
+        warnings:
+          type: array
+          items:
+            type: string
