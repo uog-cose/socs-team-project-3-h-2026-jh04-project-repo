@@ -1,0 +1,168 @@
+.header {
+  background: var(--mantine-color-body);
+  border-bottom: 0;
+}
+
+.tagline {
+  min-width: 0;
+  overflow: hidden;
+  font-size: 14px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.roundButton {
+  border-color: light-dark(var(--mantine-color-gray-2), var(--mantine-color-dark-5));
+  background: light-dark(var(--mantine-color-gray-1), var(--mantine-color-dark-6));
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 34px;
+  padding: 0 16px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.statusPill {
+  background: light-dark(var(--mantine-color-dark-7), var(--mantine-color-dark-5));
+  color: var(--mantine-color-white);
+}
+
+.statusDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--mantine-color-gray-4);
+}
+
+.statusPill[data-status='success'] .statusDot {
+  background: var(--mantine-color-cobalt-3);
+}
+
+.statusPill[data-status='error'] .statusDot {
+  background: var(--mantine-color-red-5);
+}
+
+.lightPill {
+  background: light-dark(var(--mantine-color-gray-2), var(--mantine-color-dark-6));
+  transition: background 120ms ease;
+
+  @mixin hover {
+    background: light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-5));
+  }
+}
+
+.dots {
+  display: inline-flex;
+  gap: 3px;
+
+  & > span {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+}
+
+.navbar {
+  overflow-y: auto;
+  background: var(--mantine-color-body);
+  border-right: 0;
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 14px;
+  margin-bottom: 4px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 500;
+  transition:
+    background 120ms ease,
+    color 120ms ease;
+
+  @mixin hover {
+    background: light-dark(var(--mantine-color-gray-2), var(--mantine-color-dark-6));
+  }
+
+  &[data-active] {
+    background: light-dark(var(--mantine-color-dark-7), var(--mantine-color-cobalt-6));
+    color: var(--mantine-color-white);
+  }
+}
+
+.navIndex {
+  font-family: var(--mantine-font-family-monospace);
+  font-size: 11px;
+  opacity: 0.6;
+}
+
+.main {
+  background: var(--mantine-color-body);
+}
+
+.page {
+  max-width: 1120px;
+  margin: 0 auto;
+}
+
+.stepTile {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: var(--mantine-radius-md);
+  background: light-dark(var(--mantine-color-cobalt-0), var(--mantine-color-dark-6));
+  color: light-dark(var(--mantine-color-cobalt-9), var(--mantine-color-cobalt-3));
+  font-size: 26px;
+  font-weight: 400;
+}
+
+.title {
+  letter-spacing: -0.01em;
+}
+
+.card {
+  padding: var(--mantine-spacing-xl);
+  border: 1px solid var(--app-border);
+  border-radius: var(--mantine-radius-lg);
+  background: var(--app-surface);
+
+  @media (max-width: $mantine-breakpoint-sm) {
+    padding: var(--mantine-spacing-md);
+  }
+}
+
+.markers {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+  padding: 0 2px;
+  color: light-dark(var(--mantine-color-dark-7), var(--mantine-color-dark-1));
+  font-size: 14px;
+  line-height: 1;
+}
+
+.markerCaption {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.footer {
+  border-top: 0;
+  background: transparent;
+}
