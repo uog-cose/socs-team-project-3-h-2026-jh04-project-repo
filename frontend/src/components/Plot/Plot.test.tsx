@@ -1,6 +1,8 @@
+
 import { screen } from '@testing-library/react'
 import type { Config, Layout, ModeBarButton, ScatterData } from 'plotly.js-dist-min'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { initialSession, useSessionStore } from '../../state/sessionStore'
 import { renderWithProviders } from '../../test/render'
 import { Plot } from './Plot'
 
@@ -8,7 +10,12 @@ import { Plot } from './Plot'
 const plotly = vi.hoisted(() => ({
   downloadImage: vi.fn(),
   lastProps: undefined as
-    { data: Partial<ScatterData>[]; layout: Partial<Layout>; config: Partial<Config> } | undefined,
+    | {
+        data: Partial<ScatterData>[]
+        layout: Partial<Layout>
+        config: Partial<Config>
+      }
+    | undefined,
 }))
 
 vi.mock('plotly.js-dist-min', () => ({
@@ -32,10 +39,13 @@ describe('Plot', () => {
   beforeEach(() => {
     plotly.lastProps = undefined
     plotly.downloadImage.mockClear()
+    useSessionStore.setState(initialSession)
   })
 
   it('draws one trace per series with a legend', async () => {
-    renderWithProviders(<Plot series={series} xLabel="Stretch" yLabel="Cauchy stress (kPa)" />)
+    renderWithProviders(
+      <Plot series={series} xLabel="Stretch" yLabel="Cauchy stress (kPa)" />,
+    )
     await screen.findByTestId('plotly')
 
     const { data, layout } = plotly.lastProps!
@@ -47,13 +57,18 @@ describe('Plot', () => {
   })
 
   it('hides the legend for a single series', async () => {
-    renderWithProviders(<Plot series={series.slice(0, 1)} xLabel="x" yLabel="y" />)
+    renderWithProviders(
+      <Plot series={series.slice(0, 1)} xLabel="x" yLabel="y" />,
+    )
     await screen.findByTestId('plotly')
+
     expect(plotly.lastProps!.layout.showlegend).toBe(false)
   })
 
   it('labels both axes', async () => {
-    renderWithProviders(<Plot series={series} xLabel="Stretch" yLabel="Cauchy stress (kPa)" />)
+    renderWithProviders(
+      <Plot series={series} xLabel="Stretch" yLabel="Cauchy stress (kPa)" />,
+    )
     await screen.findByTestId('plotly')
 
     const { layout } = plotly.lastProps!
@@ -61,18 +76,47 @@ describe('Plot', () => {
     expect(layout.yaxis?.title).toMatchObject({ text: 'Cauchy stress (kPa)' })
   })
 
+  it('uses the selected unit labels for measured axes', async () => {
+    useSessionStore.setState({
+      ...initialSession,
+      units: { length: 'cm', force: 'kN', stress: 'MPa' },
+    })
+
+    renderWithProviders(
+      <Plot
+        series={series}
+        xLabel="Stretch"
+        yLabel="Stress"
+        xMeasure={{ id: 'length', label: 'Length', quantity: 'length' }}
+        yMeasure={{ id: 'stress', label: 'Stress', quantity: 'stress' }}
+      />,
+    )
+    await screen.findByTestId('plotly')
+
+    const { layout } = plotly.lastProps!
+    expect(layout.xaxis?.title).toMatchObject({ text: 'Length (cm)' })
+    expect(layout.yaxis?.title).toMatchObject({ text: 'Stress (MPa)' })
+  })
+
   it('exports PNG from the camera button and SVG from an extra button', async () => {
-    renderWithProviders(<Plot series={series} xLabel="x" yLabel="y" filename="results" />)
+    renderWithProviders(
+      <Plot series={series} xLabel="x" yLabel="y" filename="results" />,
+    )
     await screen.findByTestId('plotly')
 
     const { config } = plotly.lastProps!
-    expect(config.toImageButtonOptions).toMatchObject({ format: 'png', filename: 'results' })
+    expect(config.toImageButtonOptions).toMatchObject({
+      format: 'png',
+      filename: 'results',
+    })
 
     const svgButton = config.modeBarButtonsToAdd?.find(
       (b): b is ModeBarButton => typeof b === 'object' && b.name === 'downloadSvg',
     )
     const graphDiv = document.createElement('div')
+
     svgButton!.click(graphDiv as never, new MouseEvent('click'))
+
     expect(plotly.downloadImage).toHaveBeenCalledWith(graphDiv, {
       format: 'svg',
       filename: 'results',

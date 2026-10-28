@@ -1,8 +1,11 @@
+
 import { useComputedColorScheme, useMantineTheme } from '@mantine/core'
 import Plotly, { type Config, type Layout, type LayoutAxis } from 'plotly.js-dist-min'
 import createPlotlyComponent from 'react-plotly.js/factory'
 import { useMemo } from 'react'
+import { useSessionStore } from '../../state/sessionStore'
 import { palette } from '../../theme/palette'
+import { axisLabel } from './axisLabel'
 import { buildTraces, seriesColors } from './traces'
 import type { PlotProps } from './types'
 
@@ -17,13 +20,19 @@ export default function PlotlyChart({
   series,
   xLabel,
   yLabel,
+  xMeasure,
+  yMeasure,
   title,
   height = 400,
   filename = 'pymecht-plot',
 }: PlotProps) {
   const theme = useMantineTheme()
-  const scheme = useComputedColorScheme('light')
+  const scheme = useComputedColorScheme('light') === 'dark' ? 'dark' : 'light'
   const colors = schemes[scheme]
+  const units = useSessionStore((state) => state.units)
+
+  const resolvedXLabel = xMeasure ? axisLabel(xMeasure, units) : xLabel
+  const resolvedYLabel = yMeasure ? axisLabel(yMeasure, units) : yLabel
 
   const data = useMemo(() => buildTraces(series, seriesColors[scheme]), [series, scheme])
 
@@ -37,6 +46,7 @@ export default function PlotlyChart({
       tickcolor: colors.line,
       automargin: true,
     })
+
     return {
       autosize: true,
       height,
@@ -45,14 +55,22 @@ export default function PlotlyChart({
       plot_bgcolor: colors.surface,
       font: { family: theme.fontFamily, size: 12, color: colors.text },
       title: title ? { text: title, x: 0, xanchor: 'left', font: { size: 15 } } : undefined,
-      xaxis: axis(xLabel),
-      yaxis: axis(yLabel),
+      xaxis: axis(resolvedXLabel),
+      yaxis: axis(resolvedYLabel),
       showlegend: series.length > 1,
       legend: { orientation: 'h', x: 1, xanchor: 'right', y: 1.02, yanchor: 'bottom' },
       hovermode: 'closest',
       hoverlabel: { font: { family: theme.fontFamilyMonospace } },
     }
-  }, [colors, height, series.length, theme, title, xLabel, yLabel])
+  }, [
+    colors,
+    height,
+    series.length,
+    theme,
+    title,
+    resolvedXLabel,
+    resolvedYLabel,
+  ])
 
   const config = useMemo(
     (): Partial<Config> => ({
