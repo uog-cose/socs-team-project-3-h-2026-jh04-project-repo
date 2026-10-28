@@ -1,7 +1,8 @@
-import { List, Select, Stack, Text, Title } from '@mantine/core'
+import { Select, Stack, Text, Title } from '@mantine/core'
 
 import { useCatalog } from '../../api/queries'
 import { useSessionStore } from '../../state/sessionStore'
+import { Equation } from '../../components/Equation'
 
 export function MaterialPage() {
   const { data: catalog, isPending, isError } = useCatalog()
@@ -51,19 +52,43 @@ export function MaterialPage() {
         />
       )}
 
+
       <Title order={3}>Current components</Title>
 
       {components.length === 0 ? (
-        <Text c="dimmed">No material components selected. Choose a preset above.</Text>
+        <Text c="dimmed">
+          No material components selected. Choose a preset above.
+        </Text>
       ) : (
-        <List>
-          {components.map((component) => {
-            const material = catalog?.materials.find((item) => item.type === component.type)
+        <>
+          <Stack gap="md">
+            {components.map((component, index) => {
+              const material = catalog?.materials.find(
+                (item) => item.type === component.type,
+              )
 
-            return <List.Item key={component.id}>{material?.name ?? component.type}</List.Item>
-          })}
-        </List>
+              return (
+                <div key={component.id}>
+                  <Text fw={500}>
+                    Component {index + 1}: {material?.name ?? component.type}
+                  </Text>
+
+                  {material && <Equation latex={material.equation} />}
+                </div>
+              )
+            })}
+          </Stack>
+
+          <Title order={3}>Total strain-energy function</Title>
+
+          <Equation
+            latex={`\\Psi_{\\mathrm{total}} = ${components
+              .map((_, index) => `\\Psi_{${index + 1}}`)
+              .join(' + ')}`}
+          />
+        </>
       )}
+
     </Stack>
   )
 }
