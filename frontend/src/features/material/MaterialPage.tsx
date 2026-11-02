@@ -1,20 +1,28 @@
+
 import { Select, Stack, Text, Title } from '@mantine/core'
 
 import { useCatalog } from '../../api/queries'
 import { useSessionStore } from '../../state/sessionStore'
 import { Equation } from '../../components/Equation'
+import { FiberDirection } from './FiberDirection'
 
 export function MaterialPage() {
   const { data: catalog, isPending, isError } = useCatalog()
 
   const components = useSessionStore((state) => state.material.components)
   const setComponents = useSessionStore((state) => state.setComponents)
+  const experimentType = useSessionStore((state) => state.experiment.type)
+  const setFiber = useSessionStore((state) => state.setFiber)
 
   const selectedPreset = catalog?.presets.find(
     (preset) =>
       preset.components.length === components.length &&
       preset.components.every((type, index) => type === components[index]?.type),
   )
+
+  const referenceAxis =
+    catalog?.experiments.find((experiment) => experiment.type === experimentType)
+      ?.fiberReferenceAxis ?? 'x'
 
   function handlePresetChange(presetId: string | null) {
     if (!presetId || !catalog) return
@@ -36,7 +44,11 @@ export function MaterialPage() {
 
       {isPending && <Text>Loading material presets...</Text>}
 
-      {isError && <Text c="red">Could not load material presets. Please try again.</Text>}
+      {isError && (
+        <Text c="red">
+          Could not load material presets. Please try again.
+        </Text>
+      )}
 
       {catalog && (
         <Select
@@ -51,7 +63,6 @@ export function MaterialPage() {
           disabled={catalog.presets.length === 0}
         />
       )}
-
 
       <Title order={3}>Current components</Title>
 
@@ -74,6 +85,14 @@ export function MaterialPage() {
                   </Text>
 
                   {material && <Equation latex={material.equation} />}
+
+                  {material?.fiberBased && (
+                    <FiberDirection
+                      fiber={component.fiber ?? null}
+                      referenceAxis={referenceAxis}
+                      onChange={(fiber) => setFiber(component.id, fiber)}
+                    />
+                  )}
                 </div>
               )
             })}
@@ -88,7 +107,6 @@ export function MaterialPage() {
           />
         </>
       )}
-
     </Stack>
   )
 }
