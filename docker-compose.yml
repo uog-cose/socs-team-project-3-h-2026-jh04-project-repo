@@ -1,0 +1,28 @@
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    environment:
+      PYMECHT_CORS_ORIGINS: http://localhost:5173
+      PYMECHT_DEBUG: "false"
+    healthcheck:
+      # The slim image has no curl, so use Python to hit /health
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "5173:5173"
+    environment:
+      VITE_API_URL: http://localhost:8000
+      VITE_USE_MOCKS: "false"
+    depends_on:
+      backend:
+        condition: service_healthy
+    volumes:
+      # Hot reload: edits to src show up without rebuilding
+      - ./frontend/src:/app/src
