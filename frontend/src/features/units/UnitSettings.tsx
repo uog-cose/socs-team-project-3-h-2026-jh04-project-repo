@@ -1,4 +1,3 @@
-
 import { Alert, Select, SimpleGrid, Stack, Text } from '@mantine/core'
 
 import { useSessionStore } from '../../state/sessionStore'
@@ -30,13 +29,11 @@ export function UnitSettings() {
 
   return (
     <Stack gap="md">
-      <Text>
-        Choose the unit labels for your experiment.
-      </Text>
+      <Text>Choose the unit labels for your experiment.</Text>
 
       <Alert color="blue" title="Important">
-        pyMechT is unit-free and does not convert values automatically.
-        Enter all inputs using a consistent system of units.
+        pyMechT is unit-free and does not convert values automatically. Enter all inputs using a
+        consistent system of units.
       </Alert>
 
       <SimpleGrid cols={{ base: 1, sm: 3 }}>

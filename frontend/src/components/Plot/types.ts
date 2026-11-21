@@ -1,4 +1,3 @@
-
 import type { Measure } from '../../api/types'
 
 export interface PlotSeries {

@@ -1,4 +1,3 @@
-
 import { useComputedColorScheme, useMantineTheme } from '@mantine/core'
 import Plotly, { type Config, type Layout, type LayoutAxis } from 'plotly.js-dist-min'
 import createPlotlyComponent from 'react-plotly.js/factory'
@@ -62,15 +61,7 @@ export default function PlotlyChart({
       hovermode: 'closest',
       hoverlabel: { font: { family: theme.fontFamilyMonospace } },
     }
-  }, [
-    colors,
-    height,
-    series.length,
-    theme,
-    title,
-    resolvedXLabel,
-    resolvedYLabel,
-  ])
+  }, [colors, height, series.length, theme, title, resolvedXLabel, resolvedYLabel])
 
   const config = useMemo(
     (): Partial<Config> => ({

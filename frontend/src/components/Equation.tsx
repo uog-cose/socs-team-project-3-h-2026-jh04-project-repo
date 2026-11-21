@@ -1,4 +1,3 @@
-
 import { useMemo } from 'react'
 import katex from 'katex'
 import 'katex/dist/katex.min.css'
@@ -8,10 +7,7 @@ interface EquationProps {
   displayMode?: boolean
 }
 
-export function Equation({
-  latex,
-  displayMode = true,
-}: EquationProps) {
+export function Equation({ latex, displayMode = true }: EquationProps) {
   const html = useMemo(
     () =>
       katex.renderToString(latex, {
