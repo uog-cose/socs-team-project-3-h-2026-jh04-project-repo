@@ -1,4 +1,3 @@
-
 import { Select, Stack, Text, Title } from '@mantine/core'
 
 import { useCatalog } from '../../api/queries'
@@ -44,11 +43,7 @@ export function MaterialPage() {
 
       {isPending && <Text>Loading material presets...</Text>}
 
-      {isError && (
-        <Text c="red">
-          Could not load material presets. Please try again.
-        </Text>
-      )}
+      {isError && <Text c="red">Could not load material presets. Please try again.</Text>}
 
       {catalog && (
         <Select
@@ -67,16 +62,12 @@ export function MaterialPage() {
       <Title order={3}>Current components</Title>
 
       {components.length === 0 ? (
-        <Text c="dimmed">
-          No material components selected. Choose a preset above.
-        </Text>
+        <Text c="dimmed">No material components selected. Choose a preset above.</Text>
       ) : (
         <>
           <Stack gap="md">
             {components.map((component, index) => {
-              const material = catalog?.materials.find(
-                (item) => item.type === component.type,
-              )
+              const material = catalog?.materials.find((item) => item.type === component.type)
 
               return (
                 <div key={component.id}>

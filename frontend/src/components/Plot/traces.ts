@@ -1,4 +1,3 @@
-
 import type { PlotSeries } from './types'
 
 export const seriesColors = {
@@ -6,10 +5,7 @@ export const seriesColors = {
   dark: ['#a5b4fc', '#5eead4', '#fcd34d', '#fca5a5', '#93c5fd'],
 }
 
-export function buildTraces(
-  series: PlotSeries[],
-  colors: string[],
-) {
+export function buildTraces(series: PlotSeries[], colors: string[]) {
   return series.map((item, index) => ({
     type: 'scatter' as const,
     name: item.name,

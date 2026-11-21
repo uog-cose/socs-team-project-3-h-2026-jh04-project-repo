@@ -1,4 +1,3 @@
-
 import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it } from 'vitest'
@@ -15,12 +14,9 @@ describe('UnitSettings', () => {
   it('shows the default unit labels', () => {
     renderWithProviders(<UnitSettings />)
 
-    expect(screen.getByRole('combobox', { name: 'Length' }))
-      .toHaveValue('Millimetres (mm)')
-    expect(screen.getByRole('combobox', { name: 'Force' }))
-      .toHaveValue('Newtons (N)')
-    expect(screen.getByRole('combobox', { name: 'Stress' }))
-      .toHaveValue('Kilopascals (kPa)')
+    expect(screen.getByRole('combobox', { name: 'Length' })).toHaveValue('Millimetres (mm)')
+    expect(screen.getByRole('combobox', { name: 'Force' })).toHaveValue('Newtons (N)')
+    expect(screen.getByRole('combobox', { name: 'Stress' })).toHaveValue('Kilopascals (kPa)')
   })
 
   it('updates the selected length unit', async () => {
@@ -28,9 +24,7 @@ describe('UnitSettings', () => {
     renderWithProviders(<UnitSettings />)
 
     await user.click(screen.getByRole('combobox', { name: 'Length' }))
-    await user.click(
-      screen.getByRole('option', { name: 'Centimetres (cm)' }),
-    )
+    await user.click(screen.getByRole('option', { name: 'Centimetres (cm)' }))
 
     expect(useSessionStore.getState().units.length).toBe('cm')
   })
@@ -39,8 +33,6 @@ describe('UnitSettings', () => {
     renderWithProviders(<UnitSettings />)
 
     expect(screen.getByText(/pyMechT is unit-free/i)).toBeInTheDocument()
-    expect(
-      screen.getByText(/does not convert values automatically/i),
-    ).toBeInTheDocument()
+    expect(screen.getByText(/does not convert values automatically/i)).toBeInTheDocument()
   })
 })

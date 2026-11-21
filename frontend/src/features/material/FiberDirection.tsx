@@ -1,4 +1,3 @@
-
 import { NumberInput, SegmentedControl, Stack, Text } from '@mantine/core'
 import type { FiberConfig } from '../../api/types'
 
@@ -8,11 +7,7 @@ type FiberDirectionProps = {
   onChange: (fiber: FiberConfig) => void
 }
 
-export function FiberDirection({
-  fiber,
-  referenceAxis,
-  onChange,
-}: FiberDirectionProps) {
+export function FiberDirection({ fiber, referenceAxis, onChange }: FiberDirectionProps) {
   const mode = fiber?.mode ?? 'single'
   const angleDeg = fiber?.angleDeg ?? 0
 
@@ -49,9 +44,7 @@ export function FiberDirection({
       <SegmentedControl
         fullWidth
         value={mode}
-        onChange={(value) =>
-          updateFiber({ mode: value as FiberConfig['mode'] })
-        }
+        onChange={(value) => updateFiber({ mode: value as FiberConfig['mode'] })}
         data={[
           { label: 'Single', value: 'single' },
           { label: 'Symmetric ± pair', value: 'symmetric' },
@@ -96,20 +89,10 @@ export function FiberDirection({
           opacity="0.3"
         />
 
-        <line
-          {...firstLine}
-          stroke="#228be6"
-          strokeWidth="3"
-          strokeLinecap="round"
-        />
+        <line {...firstLine} stroke="#228be6" strokeWidth="3" strokeLinecap="round" />
 
         {mode === 'symmetric' && (
-          <line
-            {...getLine(-angle)}
-            stroke="#228be6"
-            strokeWidth="3"
-            strokeLinecap="round"
-          />
+          <line {...getLine(-angle)} stroke="#228be6" strokeWidth="3" strokeLinecap="round" />
         )}
 
         <text x="180" y="118" fontSize="10" textAnchor="end" fill="currentColor">

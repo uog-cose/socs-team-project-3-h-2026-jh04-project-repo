@@ -1,4 +1,3 @@
-
 import { screen } from '@testing-library/react'
 import type { Config, Layout, ModeBarButton, ScatterData } from 'plotly.js-dist-min'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -43,9 +42,7 @@ describe('Plot', () => {
   })
 
   it('draws one trace per series with a legend', async () => {
-    renderWithProviders(
-      <Plot series={series} xLabel="Stretch" yLabel="Cauchy stress (kPa)" />,
-    )
+    renderWithProviders(<Plot series={series} xLabel="Stretch" yLabel="Cauchy stress (kPa)" />)
     await screen.findByTestId('plotly')
 
     const { data, layout } = plotly.lastProps!
@@ -57,18 +54,14 @@ describe('Plot', () => {
   })
 
   it('hides the legend for a single series', async () => {
-    renderWithProviders(
-      <Plot series={series.slice(0, 1)} xLabel="x" yLabel="y" />,
-    )
+    renderWithProviders(<Plot series={series.slice(0, 1)} xLabel="x" yLabel="y" />)
     await screen.findByTestId('plotly')
 
     expect(plotly.lastProps!.layout.showlegend).toBe(false)
   })
 
   it('labels both axes', async () => {
-    renderWithProviders(
-      <Plot series={series} xLabel="Stretch" yLabel="Cauchy stress (kPa)" />,
-    )
+    renderWithProviders(<Plot series={series} xLabel="Stretch" yLabel="Cauchy stress (kPa)" />)
     await screen.findByTestId('plotly')
 
     const { layout } = plotly.lastProps!
@@ -99,9 +92,7 @@ describe('Plot', () => {
   })
 
   it('exports PNG from the camera button and SVG from an extra button', async () => {
-    renderWithProviders(
-      <Plot series={series} xLabel="x" yLabel="y" filename="results" />,
-    )
+    renderWithProviders(<Plot series={series} xLabel="x" yLabel="y" filename="results" />)
     await screen.findByTestId('plotly')
 
     const { config } = plotly.lastProps!
