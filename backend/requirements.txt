@@ -1,3 +1,6 @@
 fastapi
 uvicorn[standard]
 pydantic-settings
+pymecht
+# pymecht imports "pyDOE", but pyDOE 1.6+ renamed the module to "pydoe", which breaks the import
+pyDOE==0.3.8
