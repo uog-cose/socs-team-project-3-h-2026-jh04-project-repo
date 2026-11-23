@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
 from app.config import settings
 from app.errors import register_exception_handlers
 from app.schemas import SimulateRequest, SimulateResponse
