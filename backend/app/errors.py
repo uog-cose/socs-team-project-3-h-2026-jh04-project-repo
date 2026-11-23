@@ -2,6 +2,7 @@ import logging
 
 import numpy as np
 from fastapi import FastAPI, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
 logger = logging.getLogger("pymecht_api")
@@ -86,6 +87,17 @@ async def handle_calculation_error(request: Request, exc: Exception) -> JSONResp
     return _error_response(422, readable_message(exc))
 
 
+async def handle_invalid_request(request: Request, exc: RequestValidationError) -> JSONResponse:
+    """Turns FastAPI's list of validation errors into one readable message.
+
+    The frontend expects detail to be a string, but FastAPI sends a list by default.
+    """
+    problems = []
+    for error in exc.errors():
+        field = ".".join(str(part) for part in error["loc"] if part != "body")
+        problems.append(f"{field}: {error['msg']}" if field else error["msg"])
+    return _error_response(422, "The request is invalid. " + "; ".join(problems))
+
 async def handle_unexpected_error(request: Request, exc: Exception) -> JSONResponse:
     logger.exception("Unexpected error on %s %s", request.method, request.url.path)
     return _error_response(500, "Something went wrong on the server. Please try again.")
@@ -93,6 +105,7 @@ async def handle_unexpected_error(request: Request, exc: Exception) -> JSONRespo
 
 def register_exception_handlers(app: FastAPI) -> None:
     app.add_exception_handler(SimulationError, handle_simulation_error)
+    app.add_exception_handler(RequestValidationError, handle_invalid_request)
     for error_type in (ValueError, ArithmeticError, np.linalg.LinAlgError):
         app.add_exception_handler(error_type, handle_calculation_error)
     app.add_exception_handler(Exception, handle_unexpected_error)

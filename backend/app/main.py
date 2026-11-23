@@ -1,8 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
 from app.config import settings
 from app.errors import register_exception_handlers
+from app.schemas import SimulateRequest, SimulateResponse
+from app.simulation import run_simulation
 
 # debug is not passed to FastAPI, because debug mode sends tracebacks to the browser.
 app = FastAPI(title="pyMechT GUI API", version="0.1.0")
@@ -20,3 +21,8 @@ register_exception_handlers(app)
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
+
+@app.post("/simulate", response_model=SimulateResponse)
+def simulate(request: SimulateRequest) -> SimulateResponse:
+    return run_simulation(request.config)
