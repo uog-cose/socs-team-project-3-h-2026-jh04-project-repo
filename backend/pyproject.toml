@@ -1,0 +1,6 @@
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+
+#E checks pycodestyle errors.
+#F checks for potential errors and unused imports.
+#I checks import ordering.
