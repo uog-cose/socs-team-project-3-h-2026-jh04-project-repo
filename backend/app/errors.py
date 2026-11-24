@@ -95,7 +95,9 @@ async def handle_invalid_request(request: Request, exc: RequestValidationError) 
     problems = []
     for error in exc.errors():
         field = ".".join(str(part) for part in error["loc"] if part != "body")
-        problems.append(f"{field}: {error['msg']}" if field else error["msg"])
+        # Pydantic starts the messages from our own validators with "Value error, ".
+        message = error["msg"].removeprefix("Value error, ")
+        problems.append(f"{field}: {message}" if field else message)
     return _error_response(422, "The request is invalid. " + "; ".join(problems))
 
 async def handle_unexpected_error(request: Request, exc: Exception) -> JSONResponse:
