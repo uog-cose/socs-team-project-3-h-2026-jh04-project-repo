@@ -8,7 +8,9 @@ import pymecht as pmt
 
 from app.errors import SimulationError, readable_message, run_force_controlled
 from app.schemas import (
+    ExperimentConfig,
     FiberConfig,
+    MaterialConfig,
     ParameterRow,
     Protocol,
     SessionConfig,
@@ -20,6 +22,8 @@ EXPERIMENTS = {
     "biaxial": pmt.PlanarBiaxialExtension,
     "tube": pmt.TubeInflation,
 }
+
+NO_MATERIAL_MESSAGE = "Add at least one material component before simulating."
 
 INVALID_VALUES_MESSAGE = "The simulation produced invalid values. Check the protocol range and parameter values."
 NO_INITIAL_GUESS_WARNING = "No initial guess given for a force-controlled run; using the default for each axis."
@@ -45,22 +49,22 @@ def fiber_directions(experiment_type: str, fiber: FiberConfig) -> list[np.ndarra
     return [direction(angle_rad), direction(-angle_rad)]
 
 
-def build_sample(config: SessionConfig):
-    """Builds the pyMechT material and experiment described by the config."""
-    components = config.material.components
-    if not components:
-        raise SimulationError("Add at least one material component before simulating.")
+def build_sample(material_config: MaterialConfig, experiment_config: ExperimentConfig):
+    """Builds the pyMechT material and experiment described by the config.
 
+    A material with no components is allowed, so /parameters can still return the geometry rows.
+    """
+    components = material_config.components
     material = pmt.MatModel(*(component.type for component in components))
     for component, model in zip(components, material.models):
         if component.fiber is not None:
-            model.fiber_dirs = fiber_directions(config.experiment.type, component.fiber)
+            model.fiber_dirs = fiber_directions(experiment_config.type, component.fiber)
 
-    experiment = EXPERIMENTS[config.experiment.type]
+    experiment = EXPERIMENTS[experiment_config.type]
     return experiment(
         material,
-        disp_measure=config.experiment.input_measure,
-        force_measure=config.experiment.output_measure,
+        disp_measure=experiment_config.input_measure,
+        force_measure=experiment_config.output_measure,
     )
 
 
@@ -96,11 +100,14 @@ def run_simulation(config: SessionConfig) -> SimulateResponse:
 
     pyMechT's console output is returned as the log, and its warnings as warnings.
     """
+    if not config.material.components:
+        raise SimulationError(NO_MATERIAL_MESSAGE)
+
     console = io.StringIO()
     with contextlib.redirect_stdout(console), warnings.catch_warnings(record=True) as caught:
         warnings.simplefilter("always")
         try:
-            sample = build_sample(config)
+            sample = build_sample(config.material, config.experiment)
             params = apply_parameters(sample, config.parameters)
             inputs, messages = protocol_input(config.protocol, sample._ndim)
             if config.protocol.control == "displacement":
