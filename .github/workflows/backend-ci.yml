@@ -43,7 +43,8 @@ jobs:
         run: ruff check .
 
       - name: Test
-        run: pytest
+        # Coverage of app/ is printed in the log and added to the run's summary page.
+        run: pytest --cov=app --cov-report=term-missing --cov-report=markdown-append:"$GITHUB_STEP_SUMMARY"
 
 
 
