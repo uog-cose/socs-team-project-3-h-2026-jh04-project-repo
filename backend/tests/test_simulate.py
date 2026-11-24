@@ -115,6 +115,12 @@ def test_no_material_components_gives_readable_error():
     assert response.json()["detail"] == "Add at least one material component before simulating."
 
 
+def test_unknown_material_model_gives_readable_error():
+    response = simulate(make_config(material={"components": [{"id": "c1", "type": "bogus", "fiber": None}]}))
+    assert response.status_code == 422
+    assert response.json()["detail"] == "Unknown material model bogus."
+
+
 def test_wrong_number_of_axes_gives_readable_error():
     config = make_config(protocol={"control": "displacement", "axes": [
         {"start": 1, "end": 1.2, "points": 3}, {"start": 1, "end": 1.2, "points": 3},

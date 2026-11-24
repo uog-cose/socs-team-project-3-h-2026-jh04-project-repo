@@ -23,6 +23,10 @@ EXPERIMENTS = {
     "tube": pmt.TubeInflation,
 }
 
+# The material models the GUI offers, by pyMechT name. MatModel looks names up in its module's
+# globals, so any other name either crashes with an unreadable error or builds the wrong object.
+MATERIAL_MODELS = ("nh", "mr", "yeoh", "expI1", "goh", "hgo", "ls", "polyI4")
+
 NO_MATERIAL_MESSAGE = "Add at least one material component before simulating."
 
 INVALID_VALUES_MESSAGE = "The simulation produced invalid values. Check the protocol range and parameter values."
@@ -55,6 +59,10 @@ def build_sample(material_config: MaterialConfig, experiment_config: ExperimentC
     A material with no components is allowed, so /parameters can still return the geometry rows.
     """
     components = material_config.components
+    for component in components:
+        if component.type not in MATERIAL_MODELS:
+            raise SimulationError(f"Unknown material model {component.type}.")
+
     material = pmt.MatModel(*(component.type for component in components))
     for component, model in zip(components, material.models):
         if component.fiber is not None:
