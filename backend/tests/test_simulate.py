@@ -90,7 +90,8 @@ def test_parameter_values_are_used():
 
 
 def test_force_controlled_reproduces_the_requested_forces():
-    config = make_config(protocol={"control": "force", "axes": [{"start": 0, "end": 5, "points": 3}], "initialGuess": [1.0]})
+    protocol = {"control": "force", "axes": [{"start": 0, "end": 5, "points": 3}], "initialGuess": [1.0]}
+    config = make_config(protocol=protocol)    
     response = simulate(config)
     assert response.status_code == 200
     body = response.json()
