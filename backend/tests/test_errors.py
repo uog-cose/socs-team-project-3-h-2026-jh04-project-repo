@@ -41,7 +41,8 @@ def test_readable_message_joins_pymecht_tuple_errors():
 
 
 def test_pymecht_value_error_returns_readable_422():
-    response = make_client(ValueError("GOH model class uses I4 but no fiber directions have been defined.")).get("/fail")
+    error = ValueError("GOH model class uses I4 but no fiber directions have been defined.")
+    response = make_client(error).get("/fail")    
     assert response.status_code == 422
     assert response.json()["detail"] == "GOH model class uses I4 but no fiber directions have been defined."
 

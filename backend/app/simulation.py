@@ -80,8 +80,9 @@ def apply_parameters(sample, rows: list[ParameterRow]):
 def protocol_input(protocol: Protocol, ndim: int) -> tuple[np.ndarray, list[str]]:
     """Builds the N x ndim input array from the protocol's axis ranges."""
     if len(protocol.axes) != ndim:
-        raise SimulationError(f"This experiment needs {ndim} protocol axis range(s), but {len(protocol.axes)} were given.")
-
+        raise SimulationError(
+            f"This experiment needs {ndim} protocol axis range(s), but {len(protocol.axes)} were given."
+        )
     ranges = [np.linspace(axis.start, axis.end, axis.points) for axis in protocol.axes]
     points = min(len(values) for values in ranges)
     messages = []
