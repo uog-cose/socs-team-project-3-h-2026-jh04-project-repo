@@ -46,8 +46,9 @@ def split_key(key: str) -> tuple[str, int | None]:
 def paramdict_to_rows(params, components: list[MaterialComponent]) -> list[ParameterRow]:
     """Converts a pyMechT ParamDict into parameter table rows, in pyMechT's order.
 
-    Values, bounds and the fixed flag are pyMechT's own. components must be the ones the
-    ParamDict was built from, so that component i owns the keys ending in _i.
+    Values, bounds and the fixed flag are pyMechT's own, except that bounds are widened to include
+    the value: pyMechT's polyI4 d1 defaults to 0 with a lower bound of 0.0001, which /simulate would
+    reject. components must be the ones the ParamDict was built from, so component i owns keys ending in _i.
     """
     rows = []
     for key, param in params.items():
@@ -68,8 +69,8 @@ def paramdict_to_rows(params, components: list[MaterialComponent]) -> list[Param
                 label=label,
                 value=param.value,
                 fixed=param.fixed,
-                lower=param.low,
-                upper=param.high,
+                lower=min(param.low, param.value),
+                upper=max(param.high, param.value),
             )
         )
     return rows
