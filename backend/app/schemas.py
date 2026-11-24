@@ -70,6 +70,16 @@ class SessionConfig(CamelModel):
     units: UnitLabels
 
 
+class ParametersRequest(CamelModel):
+    material: MaterialConfig
+    experiment: ExperimentConfig
+    previous: list[ParameterRow] = []
+
+
+class ParametersResponse(CamelModel):
+    parameters: list[ParameterRow]
+
+
 class SimulateRequest(CamelModel):
     config: SessionConfig
 
