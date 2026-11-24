@@ -3,7 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
 from app.errors import register_exception_handlers
-from app.schemas import SimulateRequest, SimulateResponse
+from app.parameters import build_parameter_table
+from app.schemas import ParametersRequest, ParametersResponse, SimulateRequest, SimulateResponse
 from app.simulation import run_simulation
 
 # debug is not passed to FastAPI, because debug mode sends tracebacks to the browser.
@@ -22,6 +23,11 @@ register_exception_handlers(app)
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
+
+@app.post("/parameters", response_model=ParametersResponse)
+def build_parameters(request: ParametersRequest) -> ParametersResponse:
+    return build_parameter_table(request)
 
 
 @app.post("/simulate", response_model=SimulateResponse)
