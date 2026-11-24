@@ -1,6 +1,9 @@
 [tool.ruff.lint]
 select = ["E", "F", "I"]
 
+[tool.ruff]
+line-length = 120
+
 #E checks pycodestyle errors.
 #F checks for potential errors and unused imports.
 #I checks import ordering.
